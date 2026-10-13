@@ -1,5 +1,6 @@
 package com.orderpipeline.order;
 
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -9,15 +10,22 @@ import java.util.List;
 public class OrderController {
 
     private final OrderRepository repo;
+    private final KafkaTemplate<String, String> kafka;
 
-    public OrderController(OrderRepository repo) {
+    public OrderController(OrderRepository repo, KafkaTemplate<String, String> kafka) {
         this.repo = repo;
+        this.kafka = kafka;
     }
 
     @PostMapping
     public Order create(@RequestBody Order order) {
         order.setStatus("CREATED");
-        return repo.save(order);
+        Order saved = repo.save(order);
+        String event = String.format(
+            "{\"orderId\":%d,\"productName\":\"%s\",\"quantity\":%d,\"amount\":%s}",
+            saved.getId(), saved.getProductName(), saved.getQuantity(), saved.getAmount());
+        kafka.send("order-created", String.valueOf(saved.getId()), event);
+        return saved;
     }
 
     @GetMapping
@@ -29,11 +37,4 @@ public class OrderController {
     public Order one(@PathVariable Long id) {
         return repo.findById(id).orElseThrow();
     }
-    @PutMapping("/{id}/status")
-public Order updateStatus(@PathVariable Long id,
-                          @RequestParam String status) {
-    Order order = repo.findById(id).orElseThrow();
-    order.setStatus(status);
-    return repo.save(order);
-}
 }
