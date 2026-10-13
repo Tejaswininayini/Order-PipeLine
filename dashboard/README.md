@@ -1,16 +1,30 @@
-# React + Vite
+﻿# Order Pipeline Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite frontend for the Microservices Order Processing System.
 
-Currently, two official plugins are available:
+## Pages
+- Products: product list from inventory service (mock data if service is down)
+- Orders: create an order and track its status timeline (CREATED, PAID, INVENTORY_RESERVED, COMPLETED, FAILED)
+- Chaos: service health and buttons to kill Payment / Inventory service
+- Login: placeholder
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Run
+    cd dashboard
+    npm install
+    npm run dev
 
-## React Compiler
+Open http://localhost:5173
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Services and ports
+| Service   | Port | Endpoints used                       |
+|-----------|------|--------------------------------------|
+| order     | 8081 | POST /api/orders, GET /api/orders    |
+| payment   | 8082 | POST /api/payments                   |
+| inventory | 8083 | GET /api/products                    |
 
-## Expanding the ESLint configuration
+API base URLs are in src/api/services.js.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Notes
+- If a service is not reachable, pages show mock/local data with a warning.
+- Backend services must allow CORS for http://localhost:5173.
+- Chaos page uses /actuator/health and /actuator/shutdown (Spring Actuator must be enabled).
