@@ -1,4 +1,5 @@
 ﻿import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import "./App.css";
 import Login from "./pages/Login";
 import Products from "./pages/Products";
 import Orders from "./pages/Orders";
